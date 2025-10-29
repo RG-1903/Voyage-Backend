@@ -20,7 +20,12 @@ dotenv.config();
 const app = express();
 
 // Middlewares
-app.use(cors());
+//app.use(cors());
+
+// Add the specific origin for the Postman web app
+app.use(cors({
+  origin: 'https://rg-1903-793592.postman.co'
+}));
 app.use(express.json());
 
 // --- VERCEL FILE SYSTEM FIX ---
