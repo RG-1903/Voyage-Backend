@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
 // --- THIS IS THE FIX ---
-const ClientRequest = require('../models/clientRequest'); // Changed 'ClientRequest' to 'clientRequest'
+// We are pointing to the correct file "Request.js"
+const ClientRequest = require('../models/Request'); 
 // ----------------------
 const Client = require('../models/Client'); 
 const Package = require('../models/Package'); 
@@ -28,7 +29,7 @@ router.post('/add', auth, async (req, res) => {
 
         const savedRequest = await newRequest.save();
 
-        // --- ADDED: Send Booking Invoice Email ---
+        // --- Send Booking Invoice Email ---
         try {
             const user = await Client.findById(req.user.id);
             const pkg = await Package.findById(packageId);
@@ -53,7 +54,6 @@ router.post('/add', auth, async (req, res) => {
                 console.log(`Booking invoice sent to ${user.email}`);
             }
         } catch (emailError) {
-            // Log the error, but don't fail the whole request
             console.error("Failed to send booking email:", emailError);
         }
         // --- End of Email Logic ---
