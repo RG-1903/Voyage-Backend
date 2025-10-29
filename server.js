@@ -26,15 +26,14 @@ app.use('/api/profile', require('./routes/profile'));
 // --- Database Connection ---
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB Connected Successfully... 🔌'))
-  .catch((err) => console.error('MongoDB Connection Error:', err.message));
+  .then(() => console.log('✅ MongoDB Connected Successfully... 🔌'))
+  .catch((err) => console.error('❌ MongoDB Connection Error:', err.message));
 
-// ✅ --- Export handler for Vercel ---
-module.exports = app;
-module.exports.handler = serverless(app);
+// --- Export handler for Vercel ---
+module.exports = serverless(app);
 
-// ✅ --- Optional: Run locally ---
+// --- Optional: Run locally ---
 if (require.main === module) {
   const PORT = process.env.PORT || 5001;
-  app.listen(PORT, () => console.log(`Server started on http://localhost:${PORT}`));
+  app.listen(PORT, () => console.log(`🚀 Server started locally at http://localhost:${PORT}`));
 }
