@@ -25,16 +25,16 @@ const app = express();
 // --- Middlewares ---
 app.use(cors());
 app.use(express.json());
-// This tells Vercel how to serve files from the /tmp directory
 app.use("/uploads", express.static(path.join("/tmp")));
 
-// --- AGGRESSIVE TIMEOUT FIX FOR MONGODB M0 ---
+// --- !! THIS IS THE FIX !! ---
 // Increase timeout from 10s to 60s to allow free DB to wake up
 const mongooseOptions = {
   serverSelectionTimeoutMS: 60000, // 60 seconds
   connectTimeoutMS: 60000,         // 60 seconds
   socketTimeoutMS: 60000,          // 60 seconds
 };
+// ------------------------------
 
 // --- MongoDB Connection ---
 mongoose
