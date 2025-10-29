@@ -1,6 +1,3 @@
-console.log("<<<<< RUNNING LATEST server.js CODE - Oct 29, 7:10 PM >>>>>");
-// ---------------------------
-
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -10,7 +7,8 @@ const NodeCache = require("node-cache");
 
 // --- Cache Setup ---
 const dataCache = new NodeCache({ stdTTL: 120, checkperiod: 150 });
-module.exports.dataCache = dataCache;
+// No longer need to export cache for Vercel routes, but keep it for internal use
+// module.exports.dataCache = dataCache; // Removed this export
 
 // --- Import Routes ---
 const authRoutes = require("./routes/auth.js");
@@ -25,7 +23,7 @@ const testimonialRoutes = require("./routes/testimonials.js");
 dotenv.config();
 const app = express();
 
-// --- CORS Fix ---
+// --- CORS Configuration (Keep as is, allows your Vercel frontend) ---
 const corsOptions = {
   origin: 'https://voyage-frontend-beta.vercel.app', // Your frontend URL
   optionsSuccessStatus: 200
@@ -34,29 +32,30 @@ app.use(cors(corsOptions));
 
 // --- Middlewares ---
 app.use(express.json());
-app.use("/uploads", express.static(path.join("/tmp")));
+// --- Important for Render Uploads ---
+// Render doesn't use /tmp like Vercel. We'll configure Multer later if needed,
+// but for now, this static path is less relevant unless uploads are broken.
+// Let's keep it for now but be aware Render might need a different upload strategy.
+app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // Changed to relative path
 
-// --- !! 60-SECOND TIMEOUT FIX !! ---
+// --- Mongoose 60-Second Timeout (Good for Render free tier too) ---
 const mongooseOptions = {
-  serverSelectionTimeoutMS: 60000, // 60 seconds
-  connectTimeoutMS: 60000,         // 60 seconds
-  socketTimeoutMS: 60000,          // 60 seconds
-  family: 4 // Force IPv4
+  serverSelectionTimeoutMS: 60000,
+  connectTimeoutMS: 60000,
+  socketTimeoutMS: 60000,
+  family: 4
 };
-// --- End Timeout Fix ---
 
 // --- MongoDB Connection ---
-// --- ADDED FOR DEBUGGING ---
 console.log("<<<<< ATTEMPTING MONGO CONNECTION WITH 60s TIMEOUT >>>>>");
-// ---------------------------
 mongoose
-  .connect(process.env.MONGO_URI, mongooseOptions) // Pass options here
+  .connect(process.env.MONGO_URI, mongooseOptions)
   .then(() => console.log("✅ MongoDB Connected Successfully... 🔌"))
   .catch((err) => console.error("❌ MongoDB Connection Error:", err.message));
 
 // --- API Routes ---
 app.get("/", (req, res) => {
-  res.json({ message: "Voyage API is running! 🚀" });
+  res.json({ message: "Voyage API (Render) is running! 🚀" }); // Updated message
 });
 
 app.use("/api/auth", authRoutes);
@@ -68,5 +67,7 @@ app.use("/api/contact", contactRoutes);
 app.use("/api/teams", teamRoutes);
 app.use("/api/testimonials", testimonialRoutes);
 
-// Export app for Vercel
-module.exports = app;
+// --- !! RENDER STARTUP CODE !! ---
+// Use the PORT environment variable provided by Render or default to 5000
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
