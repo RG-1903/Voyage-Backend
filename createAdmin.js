@@ -6,8 +6,8 @@ require('dotenv').config();
 const AdminUser = require('./models/AdminUser');
 
 // --- The credentials you want to create ---
-const ADMIN_USERNAME = 'admin';
-const ADMIN_PASSWORD = 'password';
+const ADMIN_USERNAME = 'bharatbhaigolaviya@gmail.com';
+const ADMIN_PASSWORD = '123456789';
 
 const createAdminAccount = async () => {
   try {
