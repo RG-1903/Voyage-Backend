@@ -29,9 +29,19 @@ app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static(path.join("/tmp")));
 
+// --- ADDED: Mongoose connection options to increase timeout ---
+// We are telling Mongoose to wait up to 30 seconds for the database
+// to respond before timing out. This should be long enough for
+// the free M0 cluster to wake up.
+const mongooseOptions = {
+  serverSelectionTimeoutMS: 30000, // 30 seconds
+  connectTimeoutMS: 30000,         // 30 seconds
+  socketTimeoutMS: 30000,          // 30 seconds
+};
+
 // MongoDB Connection
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(process.env.MONGO_URI, mongooseOptions) // <-- Pass options here
   .then(() => console.log("✅ MongoDB Connected Successfully... 🔌"))
   .catch((err) => console.error("❌ MongoDB Connection Error:", err.message));
 
