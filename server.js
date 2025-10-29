@@ -1,3 +1,7 @@
+/*
+* FILE: backend/server.js
+* ENSURING 60s TIMEOUT & CORS FIX ARE PRESENT
+*/
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -38,9 +42,9 @@ const mongooseOptions = {
   serverSelectionTimeoutMS: 60000, // 60 seconds
   connectTimeoutMS: 60000,         // 60 seconds
   socketTimeoutMS: 60000,          // 60 seconds
-  family: 4 // Force IPv4, sometimes helps with Vercel connection issues
+  family: 4 // Force IPv4
 };
-// ---------------------------------
+// --- End Timeout Fix ---
 
 // --- MongoDB Connection ---
 mongoose
