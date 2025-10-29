@@ -1,8 +1,20 @@
-import express from "express";
-import mongoose from "mongoose";
-import cors from "cors";
-import dotenv from "dotenv";
-import authRoutes from "./routes/auth.js"; // adjust path if needed
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const dotenv = require("dotenv");
+const path = require("path"); // Import path
+
+// Import all routes
+const authRoutes = require("./routes/auth.js");
+const packageRoutes = require("./routes/packages.js");
+const requestRoutes = require("./routes/requests.js");
+const userRoutes = require("./routes/users.js");
+const profileRoutes = require("./routes/profile.js");
+const contactRoutes = require("./routes/contact.js");
+const teamRoutes = require("./routes/team.js");
+const testimonialRoutes = require("./routes/testimonials.js");
+// You have two files named Request.js, assuming this is for the 'TeamMember' model
+const teamModelRoutes = require("./routes/team.js"); 
 
 dotenv.config();
 const app = express();
@@ -11,12 +23,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// --- VERCEL FILE SYSTEM FIX ---
+// Serve temporarily uploaded files from the /tmp directory
+// When a user requests /uploads/filename.png, Express will look for it in /tmp
+app.use("/uploads", express.static(path.join("/tmp")));
+
 // MongoDB Connection
 mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.MONGO_URI) // Removed deprecated options
   .then(() => console.log("✅ MongoDB Connected Successfully... 🔌"))
   .catch((err) => console.error("❌ MongoDB Connection Error:", err.message));
 
@@ -24,15 +38,16 @@ mongoose
 app.get("/", (req, res) => {
   res.json({ message: "Voyage API is running! 🚀" });
 });
+
+// Use all routes
 app.use("/api/auth", authRoutes);
+app.use("/api/packages", packageRoutes);
+app.use("/api/requests", requestRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/profile", profileRoutes);
+app.use("/api/contact", contactRoutes);
+app.use("/api/teams", teamRoutes);
+app.use("/api/testimonials", testimonialRoutes);
 
 // Export for Vercel
-import { createServer } from "http";
-import { parse } from "url";
-
-const server = createServer((req, res) => {
-  const parsedUrl = parse(req.url, true);
-  app(req, res, parsedUrl);
-});
-
-export default server;
+module.exports = app;

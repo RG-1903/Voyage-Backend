@@ -9,7 +9,7 @@ const path = require('path');
 // Multer storage configuration for profile pictures
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/');
+    cb(null, '/tmp'); // --- FIX: Save to /tmp directory ---
   },
   filename: function (req, file, cb) {
     cb(null, 'avatar-' + req.user.id + path.extname(file.originalname));
@@ -43,6 +43,7 @@ router.post('/update', [auth, upload.single('profileImageFile')], async (req, re
   if (name) profileFields.name = name;
   if (bio) profileFields.bio = bio;
   if (req.file) {
+    // --- FIX: Path should be relative to what server.js serves from /uploads ---
     profileFields.profileImage = `uploads/${req.file.filename}`;
   }
 

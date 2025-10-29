@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
-const { generateInvoicePdf } = require('./createInvoice');
+const { generateInvoicePdf } = require('./createInvoice'); // .js not needed in CJS
 
 // Configure the email transporter using your .env variables
 const transporter = nodemailer.createTransport({
@@ -22,7 +22,6 @@ const sendOtpEmail = async (to, otp) => {
     from: `"Voyage" <${process.env.EMAIL_USER}>`,
     to,
     subject: 'Your Verification Code for Voyage',
-    // FIX: This HTML content was missing from your email
     html: `
       <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; border: 1px solid #ddd; border-radius: 5px; max-width: 600px; margin: auto;">
         <h2 style="color: #0d9488; text-align: center;">Welcome to Voyage!</h2>
@@ -50,8 +49,10 @@ const sendOtpEmail = async (to, otp) => {
  */
 const sendBookingConfirmationEmail = async (to, bookingDetails) => {
     const { clientName, packageName, date, guests, totalAmount, transactionId } = bookingDetails;
-    const formattedDate = new Date(date).toLocaleDateString('en-IN');
-    const invoicesDir = path.join(__dirname, '..', 'tmp', 'invoices');
+    const formattedDate = new Date(date).toLocaleString('en-IN');
+    
+    // --- FIX: Write to Vercel's temporary /tmp directory ---
+    const invoicesDir = path.join('/tmp', 'invoices');
     if (!fs.existsSync(invoicesDir)) {
         fs.mkdirSync(invoicesDir, { recursive: true });
     }

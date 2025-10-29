@@ -8,7 +8,7 @@ const path = require('path');
 // Multer storage configuration for team member images
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/');
+    cb(null, '/tmp'); // --- FIX: Save to /tmp directory ---
   },
   filename: function (req, file, cb) {
     cb(null, 'team-' + Date.now() + path.extname(file.originalname));
@@ -35,6 +35,7 @@ router.get('/', async (req, res) => {
 router.post('/add', [auth, upload.single('imageFile')], async (req, res) => {
   try {
     const { name, title } = req.body;
+    // --- FIX: Path should be relative to what server.js serves from /uploads ---
     const imagePath = req.file ? `uploads/${req.file.filename}` : '';
     
     if (!name || !title || !imagePath) {
@@ -57,6 +58,7 @@ router.post('/update/:id', [auth, upload.single('imageFile')], async (req, res) 
   try {
     const updateData = { ...req.body };
     if (req.file) {
+        // --- FIX: Path should be relative to what server.js serves from /uploads ---
         updateData.image = `uploads/${req.file.filename}`;
     }
     
