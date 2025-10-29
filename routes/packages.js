@@ -4,24 +4,36 @@ const auth = require('../middleware/auth');
 const Package = require('../models/Package');
 const multer = require('multer');
 const path = require('path');
+const { dataCache } = require('../server'); // Import cache
 
-// Multer storage configuration for file uploads
+const CACHE_KEY = 'allPackages'; // Define a key for this data
+
+// Multer setup (remains the same)
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, '/tmp'); // --- FIX: Save to /tmp directory ---
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-  }
+  destination: function (req, file, cb) { cb(null, '/tmp'); },
+  filename: function (req, file, cb) { cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname)); }
 });
 const upload = multer({ storage: storage });
 
 // @route   GET api/packages
-// @desc    Get all packages
+// @desc    Get all packages (with Caching)
 // @access  Public
 router.get('/', async (req, res) => {
   try {
+    // --- ADDED: Check cache first ---
+    const cachedPackages = dataCache.get(CACHE_KEY);
+    if (cachedPackages) {
+      console.log('Serving packages from cache');
+      return res.json(cachedPackages);
+    }
+
+    // --- If not in cache, fetch from DB ---
+    console.log('Fetching packages from DB');
     const packages = await Package.find().sort({ createdAt: -1 });
+
+    // --- ADDED: Store in cache before sending ---
+    dataCache.set(CACHE_KEY, packages);
+
     res.json(packages);
   } catch (err) {
     console.error(err.message);
@@ -35,16 +47,18 @@ router.get('/', async (req, res) => {
 router.post('/add', [auth, upload.single('imageFile')], async (req, res) => {
   try {
     const { title, location, price, duration, rating, type, description, highlights } = req.body;
-    
-    // --- FIX: Path should be relative to what server.js serves from /uploads ---
     const imagePath = req.file ? `uploads/${req.file.filename}` : (req.body.image || '');
-    
+
     const newPackage = new Package({
         title, location, price, duration, rating, type, description, highlights,
         image: imagePath
     });
 
     const savedPackage = await newPackage.save();
+    // --- ADDED: Invalidate cache ---
+    dataCache.del(CACHE_KEY);
+    console.log('Cache invalidated for packages');
+
     res.json(savedPackage);
   } catch (err) {
     console.error(err.message);
@@ -59,15 +73,18 @@ router.post('/update/:id', [auth, upload.single('imageFile')], async (req, res) 
   try {
     const updateData = { ...req.body };
     if (req.file) {
-        // --- FIX: Path should be relative to what server.js serves from /uploads ---
         updateData.image = `uploads/${req.file.filename}`;
     }
-    
+
     const updatedPackage = await Package.findByIdAndUpdate(
       req.params.id,
       { $set: updateData },
       { new: true }
     );
+    // --- ADDED: Invalidate cache ---
+    dataCache.del(CACHE_KEY);
+    console.log('Cache invalidated for packages');
+
     res.json(updatedPackage);
   } catch (err) {
     console.error(err.message);
@@ -81,6 +98,10 @@ router.post('/update/:id', [auth, upload.single('imageFile')], async (req, res) 
 router.delete('/:id', auth, async (req, res) => {
   try {
     await Package.findByIdAndDelete(req.params.id);
+    // --- ADDED: Invalidate cache ---
+    dataCache.del(CACHE_KEY);
+    console.log('Cache invalidated for packages');
+
     res.json({ msg: 'Package removed' });
   } catch (err) {
     console.error(err.message);
