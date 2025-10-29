@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
-const ClientRequest = require('../models/ClientRequest');
-const Client = require('../models/Client'); // Need this to get user email
-const Package = require('../models/Package'); // Need this to get package details
-const sendEmail = require('../utils/sendEmail'); // Import email util
+// --- THIS IS THE FIX ---
+const ClientRequest = require('../models/clientRequest'); // Changed 'ClientRequest' to 'clientRequest'
+// ----------------------
+const Client = require('../models/Client'); 
+const Package = require('../models/Package'); 
+const sendEmail = require('../utils/sendEmail'); 
 
 // @route   POST api/requests/add
 // @desc    Add a new client request (booking)
@@ -68,8 +70,6 @@ router.post('/add', auth, async (req, res) => {
 // @access  Private (Admin)
 router.get('/', auth, async (req, res) => {
     try {
-        // Simple auth check: This assumes your 'auth' middleware can differentiate admin
-        // For now, let's just protect it. A real admin check is needed.
         const requests = await ClientRequest.find().populate('package', ['title', 'location']).populate('user', ['name', 'email']).sort({ createdAt: -1 });
         res.json(requests);
     } catch (err) {
