@@ -12,7 +12,7 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// --- Simple test route ---
+// --- Test Route ---
 app.get('/', (req, res) => {
   res.status(200).json({ message: 'Voyage API is running! 🚀' });
 });
@@ -44,12 +44,12 @@ async function connectDB() {
 
 connectDB();
 
-// --- For Vercel ---
-module.exports = app; // ✅ Vercel expects the Express app, not serverless(app)
-module.exports.handler = serverless(app); // ✅ fallback for Vercel Functions
+// --- Export for Vercel ---
+module.exports = app;
+module.exports.handler = serverless(app);
 
-// --- Local development ---
-if (require.main === module) {
+// --- Local Development ---
+if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 5001;
-  app.listen(PORT, () => console.log(`🚀 Server started locally at http://localhost:${PORT}`));
+  app.listen(PORT, () => console.log(`🚀 Server running locally on http://localhost:${PORT}`));
 }
