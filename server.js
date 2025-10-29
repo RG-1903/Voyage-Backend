@@ -1,6 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const cors = require("cors"); // Import cors
+const cors = require("cors");
 const dotenv = require("dotenv");
 const path = require("path");
 const NodeCache = require("node-cache");
@@ -22,29 +22,30 @@ const testimonialRoutes = require("./routes/testimonials.js");
 dotenv.config();
 const app = express();
 
-// --- !! THIS IS THE FIX !! ---
-// Configure CORS to allow requests ONLY from your frontend domain
+// --- CORS Fix ---
+// Allow requests from your frontend
 const corsOptions = {
   origin: 'https://voyage-frontend-beta.vercel.app', // Your frontend URL
-  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+  optionsSuccessStatus: 200
 };
-app.use(cors(corsOptions)); // Use the configured cors middleware
-// ------------------------------
+app.use(cors(corsOptions));
 
-// --- Other Middlewares ---
+// --- Middlewares ---
 app.use(express.json());
 app.use("/uploads", express.static(path.join("/tmp")));
 
-// --- DB Timeout Fix ---
+// --- !! 60-SECOND TIMEOUT FIX !! ---
+// This is the fix for the 10000ms timeout error
 const mongooseOptions = {
-  serverSelectionTimeoutMS: 60000, 
-  connectTimeoutMS: 60000,         
-  socketTimeoutMS: 60000,          
+  serverSelectionTimeoutMS: 60000, // 60 seconds
+  connectTimeoutMS: 60000,         // 60 seconds
+  socketTimeoutMS: 60000,          // 60 seconds
 };
+// ---------------------------------
 
 // --- MongoDB Connection ---
 mongoose
-  .connect(process.env.MONGO_URI, mongooseOptions) 
+  .connect(process.env.MONGO_URI, mongooseOptions) // Pass options here
   .then(() => console.log("✅ MongoDB Connected Successfully... 🔌"))
   .catch((err) => console.error("❌ MongoDB Connection Error:", err.message));
 
