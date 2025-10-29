@@ -1,7 +1,6 @@
-/*
-* FILE: backend/server.js
-* ENSURING 60s TIMEOUT & CORS FIX ARE PRESENT
-*/
+console.log("<<<<< RUNNING LATEST server.js CODE - Oct 29, 7:10 PM >>>>>");
+// ---------------------------
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -47,6 +46,9 @@ const mongooseOptions = {
 // --- End Timeout Fix ---
 
 // --- MongoDB Connection ---
+// --- ADDED FOR DEBUGGING ---
+console.log("<<<<< ATTEMPTING MONGO CONNECTION WITH 60s TIMEOUT >>>>>");
+// ---------------------------
 mongoose
   .connect(process.env.MONGO_URI, mongooseOptions) // Pass options here
   .then(() => console.log("✅ MongoDB Connected Successfully... 🔌"))
