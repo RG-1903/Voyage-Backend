@@ -7,7 +7,7 @@ const NodeCache = require("node-cache");
 
 // --- Cache Setup ---
 const dataCache = new NodeCache({ stdTTL: 120, checkperiod: 150 });
-module.exports.dataCache = dataCache; 
+module.exports.dataCache = dataCache;
 
 // --- Import Routes ---
 const authRoutes = require("./routes/auth.js");
@@ -23,7 +23,6 @@ dotenv.config();
 const app = express();
 
 // --- CORS Fix ---
-// Allow requests from your frontend
 const corsOptions = {
   origin: 'https://voyage-frontend-beta.vercel.app', // Your frontend URL
   optionsSuccessStatus: 200
@@ -35,11 +34,11 @@ app.use(express.json());
 app.use("/uploads", express.static(path.join("/tmp")));
 
 // --- !! 60-SECOND TIMEOUT FIX !! ---
-// This is the fix for the 10000ms timeout error
 const mongooseOptions = {
   serverSelectionTimeoutMS: 60000, // 60 seconds
   connectTimeoutMS: 60000,         // 60 seconds
   socketTimeoutMS: 60000,          // 60 seconds
+  family: 4 // Force IPv4, sometimes helps with Vercel connection issues
 };
 // ---------------------------------
 
